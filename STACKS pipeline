@@ -55,7 +55,7 @@ How to use vim:
 7. To write and quit (leave vim), use ':wq', then enter.
 The file should now be changed how you wanted it. If you don't write the changes and quit properly, or if you don't leave insert mode, command line freaks out and you might lose the file.
 
-Other note: after running this command successfully, make sure to write down your job ID # on a .txt file. Check it using ‘sacct -u mgilg’ which checks status of all jobs submitted by mgilg in past 24 hours. Or you could use ‘squeue’ to check current jobs in the server. 
+Other note: after running this command successfully, make sure to write down your job ID # on a .txt file. Check it using ‘sacct -u mgilg’ or “sacct -j <job number>” which checks status of all jobs submitted by mgilg in past 24 hours. Or you could use ‘squeue’ to check current jobs in the server. 
 
 3.	For the gawk command (next command) on 3/30, make sure to change the job ID # from 229630 at the very end to your job ID from step #2.
 4.	Trim and quality filter step (3/31): Again, make sure to change barcodes file to your current/updated one. 
