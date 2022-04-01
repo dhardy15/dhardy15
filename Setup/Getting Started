@@ -1,0 +1,114 @@
+Ubuntu offered a quick tutorial to the Linux command line for free (for beginners). Matt and I started with this and then moved on to Coombs (UCF terminal/virtual machine)
+
+Matt and I ended up using a VPN (cisco AnyConnect) provided through UCF to join UCF's online server. We used the program 'PuTTy' to access the server and our terminal. 
+We needed a password for both the VPN and our Coombs account. 
+
+Below are instructions to download a virtual machine and ubuntu
+
+Setting up the VirtualMachines
+
+Download the latest version of VirtualBox (even Macs so everyone is on the same playing field) from the following website 
+https://www.virtualbox.org/wiki/Downloads
+students should be able to Download and set the VirtualBox up on their own. I had my Spring 2017 students doing it and they did it without any issues (a total of 15 students) 
+
+Setting up the Xubuntu Machine
+Download the latest LTS (Long term support) from Xubuntu from the following website 
+https://xubuntu.org/getxubuntu/
+Students should 
+-go to mirror downloads for the USA 
+-select the i386.iso version and download to their computer
+Had my students do the above part outside of class as I was unsure of the wireless connectivity in the room we were using would be able to download this for everyone in a timely manner. This way they would come in with the downloaded file (I had a backup just in case on a harddrive)
+
+In you VirtualBox Manager 
+-	Click “New”
+-	Give your new virtual machine a name. I usually do the OS and the version
+o	If you put something in other than Xubuntu you will have to make sure to change the type to Linux and version will either be 32-bit or 64-bit Linux. 
+-	Click “Next”
+-	Allocate the amount of memory you want your virtual machine to have. 
+o	As long as it is in the green area it will be fine
+-	Click “Next”
+-	You will then be prompted to choose the Hard Disk option
+o	Choose “Create a virtual hard disk now”
+-	Click “Create”
+-	You will then be prompted to choose your Hard Disk File Type
+o	Choose “VDI (VirtualBox Disk Image)”
+-	Click “Next”
+-	You will then be prompted to choose a Storage on Physical Hard Disk option
+o	Choose Dynamically allocated
+-	Click “Next”
+-	You will then be prompted to choose a File location and Size
+o	Keep file location the same
+o	For Size you can choose anything- sometimes I give it ~20GB 
+-	Click “Create”
+
+Now there will be a NEW virtual machine listed in your VirtualBox Manager list to the left. 
+-	Highlight the New Virtual machine you just made 
+-	Click “Settings”
+-	In the General Option on the left Click the “Advanced” tab
+o	Change both the “Shared Clipboard” and “Drag’n’Drop” options FROM “Disabled” to “Bidirectional”
+-	Go to System on the left
+o	Unclick the “Floppy” option in the boot order
+o	Check to see if the “Acceleration” tab can be selected. If not, you need to ENABLE Virtualization in your main computers BIOS (google this- very easy- slightly different for each machines) If you can click it, make sure both the “Hardware Virtualization” boxes are checked as being enabled (the boxes next to it have to be enabled) 
+-	Go to Display on the left 
+o	Click and have a check mark in the “Enable 3D Acceleration” box
+-	Go to Storage on the left 
+o	The “controller:IDE” should be empty. Click on the empty disk image. To the right will pop up things. Under attributes click on the CD image next to the Optical drive. Select the virtual disk image you had previously downloaded (depends on where you have saved that file). Select on the correct disk image and click “Open”
+-	Click “OK”
+
+Now you are ready to install the disk image for the machine 
+-	Again highlight the New Virtual machine you just made and click “Start”
+-	Select “English” and then click “Install Xubuntu”
+-	You will then be prompted to choose options for Preparing to Install Xubuntu
+-	
+o	If you have wireless/wired connect you can select to download updates while installing Xubuntu or not, but you must click “Install third-party software….” FOR THIS CLASS we will be selecting both. So make sure both boxes have check marks in them 
+-	Click “Continue” 
+o	This might take a minute or two to move to next step. Do not worry
+-	You will then be prompted to choose the Installation Type
+o	Select “Erase disk and install Xubuntu” Do not worry this will not impact your windows or mac operating system
+-	Click “Install Now”
+o	You might obtain a warning just click “Continue”
+-	You will be prompted to select where you are
+o	Select “New York”
+-	Click “Continue”
+-	You will be prompted to select your Keyboard Layout
+o	Select “English(US)”
+-	Click “Continue” 
+-	Then you will be prompted to give some information
+o	Be sure to WRITE down somewhere your username and password. This will be what you need to log in
+o	I like to keep my things secure therefore I always require a password to log in. 
+-	Click “Continue”
+-	The installation process should begin. You will see the screen change a bunch throughout this process and this might take a while. Just let it go. 
+-	After the installation is done click “Restart Now”
+-	Some cases there has been a message to remove disk and click enter just hit enter
+-	Some cases the reboot has frozen, just turn off the virtual machine (by clicking the X and selecting power off machine and clicking ok)
+-	Try to start your virtual machine again and make sure that you can login again without any problems.  
+
+
+
+
+
+
+
+
+Adding Guest Additions to the Xubuntu Machine
+
+The Guest Additions are some extra bits of software that you install in the operating system you’re virtualizing. That operating system is also called the “guest OS”. Meanwhile, the operating system you actually have installed on your hardware and that you boot into every time you turn the system on is called the “host OS”. This is where the name Guest Additions comes from – they’re additions to the guest OS.
+Installing the Guest Additions enables various extra features that are already built into VirtualBox. These include automatic resizing, seamless mode, the bidirectional clipboard, drag and drop, and generally better performance.
+
+Add Guest Additions: 
+-	Go to Devices
+-	Select Insert Guest Additions
+-	Once the file opens up right click and Open Terminal Here
+-	In the  terminal type “sudo –s “ (run the selected command as root) 
+-	Have to put your password in
+-	Drag the “run” file in the guestadditions folder into your terminal and run
+-	When done type “reboot”
+
+To Add secure shell permissions
+-	In terminal type “sudo apt-get install openssh-server
+-	You will have to type in your password
+-	You might be asked a question during the installation select yes
+-	Once your command prompt is back type “sudo service ssh start” 
+
+
+
