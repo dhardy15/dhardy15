@@ -13,7 +13,14 @@ Did this using BaseSpace downloader (regular one from BaseSpace website)
 
 Next, I need to copy over these files from my external hard drive (D:\) to command line server on coombs:
 
-Example on how to copy over 1 of these .gz files:
+So to copy files over, you need to use:
+scp mgilg@coombs.cs.ucf.edu:/home/mgilg/fundulus/info/’filename’ ./
+This puts the files in the C drive (C:\\Users\drew)
+This command needs to be run in the Windows command prompt while you are connected to the VPN but NOT PuTTY. I got this to work without error for copying 4 out of 6 files that were in this folder. For the last two, it went back to not recognizing the host name mgilg@coombs.cs.ucf.edu... Not sure what to do here. But you can open these .tsv files with excel, except they didn’t have any useful information in them…??
+Fixed this: you have to make sure Putty can BE opened (get to the point where you can load coombs from Putty even though you don’t log in) – if putty is saying it cant connect to host when you try to log on, command prompt will not be able to connect either. Also, I pulled the other 2 files and looked through, there are more helpful files in the /optimize folder in /fundulus. Also pull the sample_read_stats.tsv file out of the /fundulus folder – this one is the one I think.
+The only file it couldn’t find was the SNP distribution plot in the /optimize folder. It could access coombs but just couldn’t find the file name, maybe a wrong file name. Try again later.  
+
+Example on how to copy over 1 of these .gz files from my hard drive to the server:
 In Windows Command Prompt:
 -	Cd to your external hard drive by typing ‘D:’ and hitting enter
 -	Cd into your folder containing the data dump from the downloader (the output folder you selected in the downloader)
@@ -56,6 +63,7 @@ How to use vim:
 The file should now be changed how you wanted it. If you don't write the changes and quit properly, or if you don't leave insert mode, command line freaks out and you might lose the file.
 
 Other note: after running this command successfully, make sure to write down your job ID # on a .txt file. Check it using ‘sacct -u mgilg’ or “sacct -j <job number>” which checks status of all jobs submitted by mgilg in past 24 hours. Or you could use ‘squeue’ to check current jobs in the server. 
+Also a quick note: if something that usually takes multiple hours to run only took a few minutes, something almost definitely went wrong. Check your 'logs' directory and use 'cat filename' to read the log files and figure out what went wrong. 
 
 3.	For the gawk command (next command) on 3/30, make sure to change the job ID # from 229630 at the very end to your job ID from step #2.
 4.	Trim and quality filter step (3/31): Again, make sure to change barcodes file to your current/updated one. 
@@ -132,5 +140,63 @@ Running the second ustacks command: I created a new popmap (popmap_filtered.tsv)
 
 We ended up lowering our quality thresholds to more than 8x coverage and 1M reads from the ustacks 'sample_read_stats' file. This file shows us both mean coverage and total number of reads for each individual after optimization. 
 
-From here on I moved on to our 3rd round of sequencing data, and then finally combined all seq. data and did one big run through the STACKS pipeline. Everything below is my notes on 
+One more random troubleshooting note: for any scripts or files in 'info' or 'scripts', if they're blue or green they are excecutable (able to be run). If they are white I wouldn't trust them to run properly. To make a file executable in command line, use 'chmod +x {filename}' which should turn it green.
+
+From here on I moved on to our 3rd round of sequencing data, and then finally combined all seq. data and did one big run through the STACKS pipeline. Everything below is my notes on our combined dataset run through the stacks pipeline from the optimize step through the 'populations' step.
+ 
+ M n m  r loci_total loci_kept variant_sites change_variant dd_variant
+1 1 1 3 80    3284096     18723        162138         162138         NA
+2 2 2 3 80    2718139     24916        257876          95738      66400
+3 3 3 3 80    2457375     28130        313335          55459      40279
+4 4 4 3 80    2314574     29518        342054          28719      26740
+5 5 5 3 80    2227121     30073        354561          12507      16212
+6 6 6 3 80    2165109     30192        358472           3911       8596
+7 7 7 3 80    2121876     30177        358816            344       3567
+8 8 8 3 80    2084373     30048        357413          -1403       1747
+9 9 9 3 80    2058545     29969        356575           -838        565
+
+
+Output for optimize ^
+
+Updated the catalog and used popmap_catalog.tsv for the ustacks catalog (next step)
+Job ID for ustacks: 328909
+
+Finished, but about 2/3rds of the TB samples failed due to bad naming in their popmap
+I updated the popmap with the correct names and hopefully this fixes this error - the ustacks command was unable to find the proper TB files in the ./cleaned folder, so it only did about 11 TB samples.
+Re-ran with job ID: 329398
+
+4/22/21 step
+I accidentally stripped off the .1. in two samples files (6 files total, 3 per sample ID)
+These were originally TB_2.1 and TB_3.1, and these are NOW NAMED TB_2 and TB_3.
+
+3/16/2022
+Ran cstacks command with job ID of 329988. Used the popmap_catalog.tsv file - but forgot to change catalog names of TB_2.1 and 3.1, so need to re-run cstacks.
+Re-ran with updated popmap with job ID of 329994
+
+3/18/2022
+cstacks did not work properly... I think it was trying to use the old popmap (popmap_catalog2.tsv) instead of popmap_catalog.tsv
+I made sure it referenced the proper catalog and ran it again with job ID: 330376
+
+cstacks is running considerably longer than it has in the past... Thought there may be an issue but luckily it is creating a log file and updating it every once in a while (i think). 
+I checked the log file and everything seems to be running fine, it's been almost 3 days straight and its on sample 253/460 or something like that. No errors so far as long as I can tell
+
+cstacks took ~8 days to run... but finally finished and looks like it has no errors. Checked the log file for run 330376 and we have 'Writing catalog in directory './denovo_M4n4m3'. Final 
+catalog contains 7,013,615 loci. cstacks is done. 
+
+3/26/22
+Started the proc_samples.slurm script command with job ID 331677
+
+Proc samples had two errors that I could tell (see screenshots in word walkthrough), one was I needed to rename a file in the ./cleaned folder that was causing issues (I think) - this WAS TB_2.2.1.fq.gz and TB_2.2.2.gq.gz and I changed these to TB_2_2.1.fq.gz and .2.fq.gz respectively
+I also changed these in the popmap and the './denovoM...' folder
+Then I changed the name of the TB_3 and TB_2 (formerly TB_3.1 and TB_2.1 respectively) in the ./cleaned folder since they were still original names and I figured this would cause an issue since procsamples.slurm is using the ./cleaned folder too. 
+Lastly, I had another issue: failed to open 'SH_22.matches.bam' file, ERROR, you might need to increase your systems open-max-file limit, and see this website for more information: https://groups.google.com/g/stacks-users/c/GZqJM_WkMhI/m/m9Hreg4oBgAJ
+After going to that site, I saw we needed to up the max limit from 1024 to 4096 and it should work.
+did this using 'ulimit -n' to check for 1024, then confirmed, then ran 'ulimit -Hn' to find the max limit i could set it to, which was 200,000, then I ran 'ulimit -n 4096' on /home/mgilg, then re-ran proc.samples.slurm with a Job ID #331685
+Job ID # again is 331685 for 2nd proc_samples.slurm run.
+
+proc_samples.slurm re-run is going well, progressed through both of those error messages and it has been running for ~7 hours now
+
+Looks like proc_samples ran well, no issues that I could see, so I ran populations with these flags: -r 1 (for loci must be present in at least 100% of individuals in each population), the -O flag with output directory specified, the -M flag with popmap_catalog.tsv, the --vcf flag to generate a .vcf file, and the --write-single-snp flag for 1 snp per locus
+Job ID for populations: 331696
+Populations ran, but ignored some of my flags. It included the --write single snp, the --vcf, and got the right -M catalog, but went back to default -O and put the files in a directory ./denovoM4n4m3/output_r80, and it also ignored the -r flag of 1.0, defaulting to 0.8 (80%)...
 
