@@ -3,3 +3,134 @@ J. Catchen, P. Hohenlohe, S. Bassham, A. Amores, and W. Cresko. Stacks: an analy
 
 Notes from my runs (things that went wrong, what worked to fix issues, and what I used):
 
+Coding Pipeline Log - Also see the READme file from Sam Greaves for all commands.
+
+9/25/21 – Received Seq. data back from Illumina BaseSpace
+Want files in .fastq format, not SAV
+Need to download the BaseSpace Seq. Hub Downloader
+Did this using BaseSpace downloader (regular one from BaseSpace website) 
+*important* - must get access to the PROJECT, not just the ‘run’ to be able to download the whole PROJECT (needed), and not just the run. Was able to select the .fastq.gz file type and my personal external hard drive to download the files (~168 GB of data)
+
+Next, I need to copy over these files from my external hard drive (D:\) to command line server on coombs:
+
+Example on how to copy over 1 of these .gz files:
+In Windows Command Prompt:
+-	Cd to your external hard drive by typing ‘D:’ and hitting enter
+-	Cd into your folder containing the data dump from the downloader (the output folder you selected in the downloader)
+-	Open up file explorer and find the exact file path to the first .gz file (I think it was 3 or 4 folders in).
+-	Right click to copy the file address in the box up top, then paste this into a .txt document on notepad. You’ll need to change the backslashes to regular slashes in command prompt for command line to recognize the folders.
+-	Cd into this folder in command prompt (the folder just before the .gz files)
+-	In file explorer, click to change the name of your .gz file and then just copy over the name of this .gz file in its entirety. Put this at the end of your file path in the .txt doc. Copy over the rest of this from .txt to command prompt. 
+-	Run this command in Windows command prompt: “scp FILE_NAME mgilg@coombs.cs.ucf.edu:/home/mgilg/file_path_you_want
+-	For file_path_you_want, I used /home/mgilg/round2/rawseqdata
+-	It’ll have you enter the password for Matt’s virtual server, then it starts to copy over this file
+-	To copy files the reverse way, just switch the file path and destinations. For example, to copy over the sample_read_stats.tsv file, you’d run ‘scp mgilg@coombs.cs.ucf.edu:/home/mgilg/round3/sample_read_stats.tsv D:’ to put the file in the external hard drive. 
+To run this to copy over all .gz files at once from the \newseqdata folder on the hard drive, we just copied over the entire base folder (everything in them – which should be a bunch of empty folders and then the .gz files) using this command in command prompt:
+‘scp -r ./NS2438-MGilg_S2_HNY7TDMXX_Lane1-2-293028970/ mgilg@coombs.cs.ucf.edu:/home/mgilg/round2/rawseqdata’
+
+Then entering the password. This will copy each file over sequentially, and it is going to take a longggggg long time. Computer must be still connected to the internet and the power to work. 
+I lost connection due to being idle on coombs, so it kicked me off after like 30 minutes of inactivity. So I had to go through and manually copy over each subfolder with the .gz files in it with a similar command to the one used above. 
+
+Useful command:
+‘du -bsh *’ provides the file sizes of all files in the current directory
+
+After I finished copying over all of the files from my external hard drive to coombs,
+From each subdirectory (containing the .gz files):
+Used the command ‘mv *.gz ../../../’ to move all of the .fastq.gz files in subfolders within subfolders to one main folder (rawseqdata). Now all files are on both my hard drive and in the coombs server under ~/home/mgilg/round2/rawseqdata. 
+
+Before you start the pipeline, you need to copy over multiple directories from Sam or from our old stuff. These include the 'info', 'scripts', and make a new, empty 'raw' and 'logs' folder. Sometimes if you don't have these some programs will throw errors.
+
+1.	Started running STACKS on new data – ran clonefilter first to remove PCR dups.
+
+2.	For the demux.sh step (next step), you have to go in and edit the SetB_barcodes.tsv file to update the new barcodes and sample names you are using. Basically, demux.sh uses this file to search seqs for your adapter and barcodes and then re-labels your sequences as your sample names. The format for this file is  a tab-spaced value format: 1st column is the 6 bp seq, then a tab, then 2nd column is the 8 bp seq, then a tab, then the sample name you want to use. Remember, these sample names can NOT have spaces in them. Use _ instead. I renamed my new .tsv file so we didn’t overwrite the original. 
+To edit files, you usually want to do this in command line using the 'vim' command, since this does not change the basic file type and and organization. 
+Once, I took a catalog file (.tsv) from the server and copied it over to my hard drive, opened it up with excel, changed a few things, then saved it back as a .tsv and re-uploaded it to the server. Something about the file had corrupted on the re-upload and I wasnt able to use it.
+How to use vim:
+1. Be careful while using vim because I've found its pretty easy to delete your whole file, or corrupt it so it can no longer be used. 
+2. First, I'd use 'cat filename' to see what file I'm looking at and everything thats inside of it, to make sure its the file I want to edit.
+3. Then, I'd use 'vim filename' to enter the editing portion of the file. This looks and acts very similar to 'cat' as it shows everything in the file. At this point, you can't delete or change anything.
+4. If you type 'i' while in vim mode, you enter 'insert' mode. Now any changes you make can be permenant, so be careful here. 
+5. Delete and make changes you need to make (can paste in newly created catalogs separated by tabs from .txt documents), and then hit escape to leave the insert mode. 
+6. To get out of 'vim' you need to 'write' your changes to the file. You can do this by typing ':w' and pressing enter.
+7. To write and quit (leave vim), use ':wq', then enter.
+The file should now be changed how you wanted it. If you don't write the changes and quit properly, or if you don't leave insert mode, command line freaks out and you might lose the file.
+
+Other note: after running this command successfully, make sure to write down your job ID # on a .txt file. Check it using ‘sacct -u mgilg’ which checks status of all jobs submitted by mgilg in past 24 hours. Or you could use ‘squeue’ to check current jobs in the server. 
+
+3.	For the gawk command (next command) on 3/30, make sure to change the job ID # from 229630 at the very end to your job ID from step #2.
+4.	Trim and quality filter step (3/31): Again, make sure to change barcodes file to your current/updated one. 
+
+(here I messed up a 'vim' and accidentally deleted a hidden file) - Troubleshooting: issues with editing .bashrc using vim and issues copying over a new .bashrc file cuz you deleted the original. 
+Stuff we tried: ls -a to see hidden files – the bash.rc file specifically. This looks like you deleted the info in this file, so its now empty. 
+
+Sam informed me that there is actually a backup copy at this address: /etc/skel/.bashrc
+So, from the home folder (~), run this: cp /etc/skel/.bashrc ./
+
+And you should be able to copy this file over. 
+
+Then need to go back in using vim .bashrc and add the stuff to the end of the file in Sam’s email. 
+Pretty sure the error (exceeding Disk Quota/no space) is caused because I was at ~980 Gbs and the hard quota limit is 1 TB. I deleted the practice folder from mgilg which cleared up about 230 GBs, now were at 745. Still throwing the same error though. 
+Another note: if you ever get a disk quota exceeded error - you need to talk to whoever runs the server and have them up your data limit. They have a 'soft' and a 'hard' limit - the soft limit comes into play 1 week after you've passed the soft limit. The hard limit cannot be passed  
+
+10/19/21 – after upping my disk space quota via Steve, I re-copied over the .bashrc backup file to /home/mgilg successfully, then successfully vim’ed into it and edited it using “i” then inserting the code Sam sent (export PATH=”/home/greaves/.bin:$PATH”) then hitting escape to exit insert mode, then typing :wq (write, quit), which actually WORKED this time!!! Double checked the file wrote successfully using vim .bashrc again
+
+Sooo, now back to trim and quality filer steps – 3/31/21 step – ran, got a job ID, but when checked the queue there wasn’t anything there… this step took 14 minutes when Sam did it so something might be wrong here
+Re-ran the 3/31 – 4/1 steps and did not get the same errors of the ‘fastp.slurm could not recognize command’. Instead, now I am getting this error:
+Processing BL_154:
+.1.fq.gz: No such file or directory
+.2.fq.gz: No such file or directory
+ .1.fq.gz: No such file or directory
+.2.fq.gz: No such file or directory
+-bash: 0 / 0: division by 0 (error token is “0”)
+Probably an error in file paths somewhere and it cant find these files…
+Emailed Sam for further help
+‘Du -h’  - used to check disk quota and file space on my account
+
+Another fix – to fix this error (showed up in the log files for fastp.slurm):
+Call: /var/spool/slurm/slurmd/job290539/slurm_script -i raw/demux -b info/SetB_barcodes_3.tsv
+FN_95
+Filtering and Trimming
+Error to read gzip file
+Error to read gzip file
+ERROR: file 'raw/demux/FN_95^M.1.fq.gz' doesn't exist, quit now
+Discarding wrong length for read 1
+Error to read gzip file
+ERROR: file 'fastp_report/FN_95^M_intermediate/FN_95^M.1.fq.gz' doesn't exist, quit now
+Discarding wrong length for read 2
+Error to read gzip file
+ERROR: file 'fastp_report/FN_95^M_intermediate/FN_95^M.2.fq.gz' doesn't exist, quit now
+ 
+Ignore highlighted region, this is not important. 
+To fix this, basically, you modified the barcodes file (.tsv) in windows (on excel or notepad) after downloading it from command line server. Because of this, when you saved the edits and re-uploaded the file into command line again, the file saved with the Windows version of line endings, not the linux version of line endings (this is where the ^M comes in). The slurm program gets confused with this and can’t read the file. So what you have to do to fix this is run this command in round2/info:
+‘dos2unix SetB_barcodes_3.tsv’
+Then it’ll say: “dos2unix: converting file SetB_barcodes_3.tsv to Unix format...”
+Then I re-ran the trim and quality filter steps and it submitted a job to the queue that I can actually see in the queue – ID #290760 on the successful try. This step SHOULD take a little while, if your ID doesn’t show up in the queue after running, something is wrong, even if you check your status using sacct -u.
+10/20/21: So it took about 45 minutes to complete in the queue, with subsections. This seems like it worked okay, so I moved onto the 4/1/21 command. Changed the barcodes file to the _3.tsv one in the command, then ran. It is progressing nicely with no errors so far.
+Note for the popmap_catalog command in 4/1 (2nd command):
+Created a changed popmap catalog using 'vim' - Needed representation from all populations, but only ~5 samples from each pop for STACKS to really call all the loci properly. So I just edited the current popmap_catalog.tsv and changed current samples to 5 of each pop from this run, and then had everything a '1'.
+To edit in vim, hit 'i', then carefully delete what you want, then copy in what you need to replace, then hit :wq (write, quit) and it will save changes and leave the file. double check it worked using cat (file)
+It looks like the ustacks.coverages script, run later on at the end of the 4/15/21 command, creates the mean coverage and max number of reads columns that you need to copy over to the sample_read_stats folder.  
+
+10.25.21 - optimize finally finished after about 6 days of queue
+
+To correctly choose optimization parameters, use "Lost in Parameter Space: a Road Map for STACKS" by Paris, Stevens, and Catchen 2017.
+
+So I went in and changed Gilg_popmap to all current 287 samples being used this run - all assinged to same pop (1)
+
+Then I determined M should be run at 3 instead of 4 this time around. So n is also run at 3, and m is run at 2. 
+Changed these in the following command, left l = 8, then ran ustacks.sh.
+
+Job ID# 292350
+
+and its in the queue
+
+Forgot to fix 1 issue with naming 1 sample – forgot 1 _, so corrected the file and re-ran this command 
+Job ID # 292669
+This time it worked no errors, so I ran ./scripts/ustacks_coverages.sh 292669 denovo_M3n3m2 and it output the file in this folder np. 
+Next, I ran the 4/22 command, when it looks like I didn’t really need to. Ustacks had already stripped the .1 off of the file names, so what happened is I had a couple of TB samples (2) named as TB 2.1 and 3.1, and this command recognized those and stripped the .1’s off of them. They are now labeled as TB 2 and TB 3… just remember this for next time
+Running the second ustacks command: I created a new popmap (popmap_filtered.tsv) in place of the popmap_catalog2.tsv that Sam created. This popmap_filtered file contains only those samples >10x coverage and > 1,000,000 reads (the READme is incorrect in saying only samples <1000000 reads or 10x coverage). Also, Sam said to only run the quality samples in the cstacks command, so I didn’t use the old popmap_catalog here. Need to talk to Gilg about lowering this threshold a little bit to include more samples, but for now I’m running this part. 
+
+We ended up lowering our quality thresholds to more than 8x coverage and 1M reads from the ustacks 'sample_read_stats' file. This file shows us both mean coverage and total number of reads for each individual after optimization. 
+
+From here on I moved on to our 3rd round of sequencing data, and then finally combined all seq. data and did one big run through the STACKS pipeline. Everything below is my notes on 
+
