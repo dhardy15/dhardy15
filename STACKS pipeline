@@ -200,3 +200,4 @@ Looks like proc_samples ran well, no issues that I could see, so I ran populatio
 Job ID for populations: 331696
 Populations ran, but ignored some of my flags. It included the --write single snp, the --vcf, and got the right -M catalog, but went back to default -O and put the files in a directory ./denovoM4n4m3/output_r80, and it also ignored the -r flag of 1.0, defaulting to 0.8 (80%)...
 
+sbatch ./scripts/populations.slurm -i denovo_M4n4m3 -M ./info/popmap_catalog.tsv -o ./test_populations_output/ -W ./populations_output/testing_whitelist.txt '--write-single-snp --structure --genepop --vcf --whitelist ./populations_output/testing_whitelist.txt'
